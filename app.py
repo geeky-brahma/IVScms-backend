@@ -7,6 +7,8 @@ import sys
 from bson.json_util import dumps, loads 
 import os
 from dotenv import load_dotenv
+from gevent.pywsgi import WSGIServer
+
 
 load_dotenv()
 
@@ -89,7 +91,9 @@ def all_complaints():
     }
     return flask.Response(response=json.dumps(data_json), status=200)
 
-
+# def create_app():
+#    return app
 
 if __name__ == '__main__':
-    app.run()
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
