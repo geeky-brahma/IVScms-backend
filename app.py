@@ -14,7 +14,8 @@ load_dotenv()
 
 def connect_pymongo():
     
-    uri=os.environ['MONGO_URI']
+    # uri=os.environ['MONGO_URI']
+    uri = os. getenv("MONGO_URI")
     try:
         client = pymongo.MongoClient(uri)
         db = client.IVSComplaints
