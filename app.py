@@ -16,7 +16,6 @@ def connect_pymongo():
     
     # uri=
     uri = os.environ.get("MONGO_URI")
-    print(uri)
     try:
         client = pymongo.MongoClient(uri)
         db = client.IVSComplaints
