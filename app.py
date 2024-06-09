@@ -82,18 +82,70 @@ def status():
 
 @app.route('/all_complaints', methods=["GET"])  
 def all_complaints():
-    cursor, conn = connect_pymongo()
+    db, collection = connect_pymongo()
     query = "SELECT * FROM complaints order by id desc"
-    cursor.execute(query)
-    records = cursor.fetchall()
-    print(records)
+    # cursor.execute(query)
+    result = collection.find()
+    list_cur = list(result) 
+    js_data = json.loads(dumps(list_cur)) 
+    print(js_data)
+    
     data_json = {
-        "data": records
+        "data": js_data
     }
     return flask.Response(response=json.dumps(data_json), status=200)
 
-# def create_app():
-#    return app
+@app.route('/edit_complaint', methods=["GET","POST"])
+def edit_complaints():
+    if request.method == "GET":
+        search_type = request.args.get('searchType')
+        searchValue = request.args.get('searchValue')
+        db, collection = connect_pymongo()
+        result = collection.find({"complaint_id":searchValue})
+        list_cur = list(result) 
+        js_data = json.loads(dumps(list_cur)) 
+        print(js_data)
+        return_data = {
+            "status": "success",
+            "summary": "data received",
+            "data": js_data
+        }
+        return flask.Response(response=json.dumps(return_data), status=201)
+    if request.method == "POST":
+        json_data = request.get_json()
+        print(f"received data: {json_data}")
+        complaintID = json_data['complaintID']
+        
+        option = json_data['option']
+        db, collection = connect_pymongo()
+        if (option == 'markAsComplete'):
+            status = json_data['status']
+            result = collection.find({"complaint_id":complaintID})
+            docID = result[0]['_id']
+            filter = { "_id": docID }  # Filter for the document to update
+            update = { "$set": { "status": "Completed" } }  # The update operation
+            result = collection.update_one(filter, update)
+        else:
+            actionTaken = json_data['actionTaken']
+            print(actionTaken)
+            result = collection.find({"complaint_id":complaintID})
+            docID = result[0]['_id']
+            filter = { "_id": docID }  # Filter for the document to update
+            update = { "$set": { "action-taken": actionTaken } }  # The update operation
+            result = collection.update_one(filter, update)
+        result = collection.find({"complaint_id":complaintID})
+        list_cur = list(result) 
+        js_data = json.loads(dumps(list_cur)) 
+        print(js_data)
+        return_data = {
+            "status": "success",
+            "summary": "data received",
+            "data": js_data
+        }
+        return flask.Response(response=json.dumps(return_data), status=201)
 
 if __name__ == '__main__':
     app.run()
+    
+    
+    
